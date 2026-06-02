@@ -1,0 +1,50 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  background: rgba(7, 13, 31, 0.9);
+  border-bottom: 1px solid $color-border;
+}
+
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  gap: 1rem;
+}
+
+.navbar__register {
+  color: #ffffff !important;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 6px 20px rgba(47, 99, 255, 0.35);
+}
+
+.navbar__logo {
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-decoration: none;
+  color: $color-primary;
+}
+
+.navbar__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+
+  a {
+    text-decoration: none;
+    color: $color-muted;
+    font-weight: 500;
+
+    &.active {
+      color: $color-text;
+    }
+  }
+}

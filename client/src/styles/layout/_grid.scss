@@ -1,0 +1,19 @@
+@use '../abstracts/mixins' as *;
+
+.container {
+  @include container;
+}
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout__main {
+  flex: 1;
+}
+
+.section {
+  padding: 3rem 0;
+}

@@ -1,0 +1,47 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.room-detail__grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1.2fr 1fr;
+    grid-template-areas:
+      'media info'
+      'aside aside';
+  }
+}
+
+.room-detail__media {
+  @include card;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+  }
+}
+
+.room-detail__price {
+  font-size: 1.5rem;
+  color: $color-primary;
+  font-weight: 700;
+}
+
+.room-detail__capacity {
+  color: $color-muted;
+}
+
+.room-detail__description {
+  color: $color-muted;
+}
+
+.room-detail__aside {
+  @media (min-width: 900px) {
+    grid-column: 1 / -1;
+    max-width: 420px;
+  }
+}

@@ -1,0 +1,47 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.room-card {
+  @include card;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.room-card__image {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.room-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.room-card__meta {
+  color: $color-muted;
+  font-size: 0.95rem;
+}
+
+.room-card__desc {
+  color: $color-muted;
+  flex: 1;
+}
+
+.room-card__actions {
+  margin-top: 1rem;
+}

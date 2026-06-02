@@ -1,0 +1,57 @@
+@use '../abstracts/variables' as *;
+
+.hero {
+  padding: 5rem 0 4rem;
+  background:
+    radial-gradient(ellipse at top right, rgba(201, 162, 39, 0.18), transparent 50%),
+    linear-gradient(180deg, $color-surface 0%, $color-bg 100%);
+}
+
+.hero__content {
+  max-width: 640px;
+}
+
+.hero__badge {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba($color-primary, 0.15);
+  color: $color-primary;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  color: $color-muted;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.loader {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  padding: 3rem;
+  color: $color-muted;
+}
+
+.loader__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid $color-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

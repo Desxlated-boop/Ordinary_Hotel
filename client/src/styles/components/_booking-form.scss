@@ -1,0 +1,62 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.booking-form,
+.auth-form,
+.admin-form {
+  @include card;
+  padding: 1.5rem;
+  display: grid;
+  gap: 1rem;
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: $color-muted;
+  }
+
+  input:not([type='checkbox']):not([type='radio']),
+  textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border-radius: 8px;
+    border: 1px solid $color-border;
+    background: $color-surface-2;
+    color: $color-text;
+  }
+}
+
+.booking-form__hint {
+  color: $color-muted;
+  font-size: 0.9rem;
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  color: $color-text !important;
+
+  input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    accent-color: $color-primary;
+    margin: 0;
+  }
+}
+
+.admin-form__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-form__upload {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-form__upload-hint code {
+  font-size: 0.85em;
+}
