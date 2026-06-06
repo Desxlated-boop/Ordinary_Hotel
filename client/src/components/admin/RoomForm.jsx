@@ -96,9 +96,6 @@ export default function RoomForm({ initial, onSubmit, onCancel, submitting }) {
         <button type="button" className="btn btn--ghost btn--sm" onClick={pickFile} disabled={uploading}>
           {uploading ? 'Загрузка…' : 'Загрузить фото'}
         </button>
-        <span className="muted admin-form__upload-hint">
-          Файл будет доступен по URL вида <code>/uploads/...</code>
-        </span>
         {uploadError && <p className="error-text">{uploadError}</p>}
       </div>
       <label className="checkbox-label">

@@ -15,6 +15,7 @@ router.put('/rooms/:id', asyncHandler(adminController.updateRoom));
 router.delete('/rooms/:id', asyncHandler(adminController.deleteRoom));
 router.get('/bookings', asyncHandler(adminController.getAllBookings));
 router.patch('/bookings/:id/cancel', asyncHandler(adminController.cancelBooking));
+router.patch('/bookings/:id/confirm', asyncHandler(adminController.confirmBooking));
 router.patch('/users/:id/block', asyncHandler(adminController.blockUser));
 router.patch('/users/:id/unblock', asyncHandler(adminController.unblockUser));
 router.post(

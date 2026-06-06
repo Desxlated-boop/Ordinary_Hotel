@@ -113,13 +113,73 @@ async function cancelBooking(req, res) {
   res.json({ data: updated.rows[0] });
 }
 
+async function confirmBooking(req, res) {
+  const { id } = req.params;
+
+  const existing = await query(
+    `SELECT b.id, b.status, b.user_id, u.is_blocked, b.room_id, b.check_in, b.check_out 
+     FROM bookings b
+     JOIN users u ON u.id = b.user_id
+     WHERE b.id = $1`,
+    [id]
+  );
+  if (existing.rows.length === 0) {
+    throw new ApiError(404, 'Booking not found');
+  }
+
+  const booking = existing.rows[0];
+  if (booking.is_blocked) {
+    throw new ApiError(400, 'Невозможно восстановить бронирование заблокированного пользователя');
+  }
+
+  if (booking.status === 'confirmed') {
+    return res.json({ data: { id: Number(id), status: 'confirmed' } });
+  }
+
+  // Check if the room is still available for those dates
+  const conflict = await query(
+    `SELECT id FROM bookings
+     WHERE room_id = $1
+       AND status = 'confirmed'
+       AND id <> $2
+       AND NOT (check_out <= $3 OR check_in >= $4)`,
+    [booking.room_id, id, booking.check_in, booking.check_out]
+  );
+
+  if (conflict.rows.length > 0) {
+    throw new ApiError(409, 'Номер недоступен на выбранные даты (уже забронирован кем-то другим)');
+  }
+
+  const updated = await query(
+    `UPDATE bookings
+     SET status = 'confirmed'
+     WHERE id = $1
+     RETURNING id, status`,
+    [id]
+  );
+
+  res.json({ data: updated.rows[0] });
+}
+
 async function blockUser(req, res) {
   const { id } = req.params;
+
+  if (Number(id) === Number(req.user.id)) {
+    throw new ApiError(400, 'Вы не можете заблокировать самого себя');
+  }
+
   const updated = await query(
     `UPDATE users SET is_blocked = true WHERE id = $1 RETURNING id, email, is_blocked`,
     [id]
   );
   if (updated.rows.length === 0) throw new ApiError(404, 'User not found');
+
+  // Automatically cancel all active bookings of the blocked user
+  await query(
+    `UPDATE bookings SET status = 'cancelled' WHERE user_id = $1 AND status = 'confirmed'`,
+    [id]
+  );
+
   res.json({ data: { id: updated.rows[0].id, email: updated.rows[0].email, isBlocked: updated.rows[0].is_blocked } });
 }
 
@@ -151,6 +211,7 @@ module.exports = {
   deleteRoom,
   getAllBookings,
   cancelBooking,
+  confirmBooking,
   blockUser,
   unblockUser,
   uploadRoomImage,

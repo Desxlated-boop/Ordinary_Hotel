@@ -69,6 +69,7 @@ export const api = {
   adminDeleteRoom: (id) => request(`/admin/rooms/${id}`, { method: 'DELETE' }),
   adminGetBookings: () => request('/admin/bookings'),
   adminCancelBooking: (id) => request(`/admin/bookings/${id}/cancel`, { method: 'PATCH' }),
+  adminConfirmBooking: (id) => request(`/admin/bookings/${id}/confirm`, { method: 'PATCH' }),
   adminBlockUser: (id) => request(`/admin/users/${id}/block`, { method: 'PATCH' }),
   adminUnblockUser: (id) => request(`/admin/users/${id}/unblock`, { method: 'PATCH' }),
   adminUploadRoomImage: (file) => {

@@ -24,7 +24,7 @@ async function assertRoomAvailable(roomId, checkIn, checkOut) {
   );
 
   if (conflict.rows.length > 0) {
-    throw new ApiError(409, 'Room is not available for selected dates');
+    throw new ApiError(409, 'Номер недоступен на выбранные даты');
   }
 }
 

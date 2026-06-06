@@ -28,8 +28,23 @@ export default function AdminBookingsPage() {
   const cancelBooking = async (id) => {
     if (!window.confirm('Отменить бронирование?')) return;
     setBusyId(id);
+    setError('');
     try {
       await api.adminCancelBooking(id);
+      await load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const confirmBooking = async (id) => {
+    if (!window.confirm('Восстановить бронирование?')) return;
+    setBusyId(id);
+    setError('');
+    try {
+      await api.adminConfirmBooking(id);
       await load();
     } catch (err) {
       setError(err.message);
@@ -90,7 +105,7 @@ export default function AdminBookingsPage() {
                     <td>{translateStatus(b.status)}</td>
                     <td>{b.userBlocked ? 'заблокирован' : 'активен'}</td>
                     <td className="table-actions">
-                      {b.status === 'confirmed' && (
+                      {b.status === 'confirmed' ? (
                         <button
                           type="button"
                           className="btn btn--ghost btn--sm"
@@ -98,6 +113,16 @@ export default function AdminBookingsPage() {
                           disabled={busyId === b.id}
                         >
                           {busyId === b.id ? 'Отмена…' : 'Отменить'}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn--ghost btn--sm"
+                          onClick={() => confirmBooking(b.id)}
+                          disabled={busyId === b.id || b.userBlocked}
+                          title={b.userBlocked ? 'Пользователь заблокирован' : ''}
+                        >
+                          {busyId === b.id ? 'Подтверждение…' : 'Подтвердить'}
                         </button>
                       )}
                       <button

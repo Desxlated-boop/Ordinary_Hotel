@@ -8,7 +8,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="container navbar__inner">
         <Link to="/" className="navbar__logo">
-          Grand Hotel
+          Ordinary Hotel
         </Link>
         <nav className="navbar__nav">
           <NavLink to="/" end>
