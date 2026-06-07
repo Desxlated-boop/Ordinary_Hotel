@@ -204,6 +204,232 @@ async function uploadRoomImage(req, res) {
   });
 }
 
+// ==========================================
+// Assignment №1: Staff Management & Queries
+// ==========================================
+
+async function getAllEmployees(req, res) {
+  const result = await query('SELECT * FROM employees ORDER BY id DESC');
+  const employees = result.rows.map(row => ({
+    id: row.id,
+    fullName: row.full_name,
+    floors: row.floors,
+    daysOfWeek: row.days_of_week,
+    createdAt: row.created_at
+  }));
+  res.json({ data: employees });
+}
+
+async function hireEmployee(req, res) {
+  const { fullName, floors, daysOfWeek } = req.body;
+  if (!fullName || !floors || !daysOfWeek) {
+    throw new ApiError(400, 'fullName, floors (array), and daysOfWeek (array) are required');
+  }
+  const parsedFloors = Array.isArray(floors) ? floors.map(Number) : [Number(floors)];
+  const parsedDays = Array.isArray(daysOfWeek) ? daysOfWeek : [daysOfWeek];
+
+  const result = await query(
+    `INSERT INTO employees (full_name, floors, days_of_week)
+     VALUES ($1, $2, $3)
+     RETURNING *`,
+    [fullName.trim(), parsedFloors, parsedDays]
+  );
+  const row = result.rows[0];
+  res.status(201).json({
+    data: {
+      id: row.id,
+      fullName: row.full_name,
+      floors: row.floors,
+      daysOfWeek: row.days_of_week,
+      createdAt: row.created_at
+    }
+  });
+}
+
+async function fireEmployee(req, res) {
+  const { id } = req.params;
+  const result = await query('DELETE FROM employees WHERE id = $1 RETURNING id', [id]);
+  if (result.rows.length === 0) {
+    throw new ApiError(404, 'Employee not found');
+  }
+  res.json({ data: { id: Number(id) } });
+}
+
+async function getAssignmentStats(req, res) {
+  const { date } = req.query;
+  const dateValue = date || new Date().toISOString().split('T')[0];
+
+  // Free rooms check
+  const freeRoomsQuery = await query(`
+    SELECT 
+      (SELECT COUNT(*) FROM rooms) - COALESCE(COUNT(DISTINCT room_id), 0) AS free_rooms
+    FROM bookings
+    WHERE status = 'confirmed' AND $1::date >= check_in AND $1::date < check_out
+  `, [dateValue]);
+  let freeRooms = Number(freeRoomsQuery.rows[0].free_rooms);
+  if (freeRooms < 0) freeRooms = 0;
+
+  // Occupied beds check (sum of guest_count for confirmed bookings)
+  const occupiedBedsQuery = await query(`
+    SELECT COALESCE(SUM(guest_count), 0) AS occupied_beds
+    FROM bookings
+    WHERE status = 'confirmed' AND $1::date >= check_in AND $1::date < check_out
+  `, [dateValue]);
+  const occupiedBeds = Number(occupiedBedsQuery.rows[0].occupied_beds);
+
+  // Total beds limit
+  const totalBedsQuery = await query(`SELECT COALESCE(SUM(capacity), 0) AS total_beds FROM rooms`);
+  const totalBeds = Number(totalBedsQuery.rows[0].total_beds);
+  let freeBeds = totalBeds - occupiedBeds;
+  if (freeBeds < 0) freeBeds = 0;
+
+  // Total cash paid by clients
+  // Cost = (days) * (price / capacity) * guest_count
+  const totalPaidQuery = await query(`
+    SELECT COALESCE(SUM(
+      (b.check_out - b.check_in) * (r.price / r.capacity) * b.guest_count
+    ), 0) AS total_paid
+    FROM bookings b
+    JOIN rooms r ON r.id = b.room_id
+    WHERE b.status = 'confirmed'
+  `);
+  const totalPaid = Number(totalPaidQuery.rows[0].total_paid);
+
+  // Clients in single rooms
+  const singleRoomClientsQuery = await query(`
+    SELECT b.id, b.guest_name, b.check_in, b.check_out, r.title AS room_title, b.origin_city, b.passport
+    FROM bookings b
+    JOIN rooms r ON r.id = b.room_id
+    WHERE b.status = 'confirmed' AND r.capacity = 1
+    ORDER BY b.check_in DESC
+  `);
+
+  res.json({
+    data: {
+      freeRooms,
+      freeBeds,
+      totalBeds,
+      totalPaid,
+      singleRoomClients: singleRoomClientsQuery.rows.map(row => ({
+        id: row.id,
+        guestName: row.guest_name,
+        checkIn: row.check_in,
+        checkOut: row.check_out,
+        roomTitle: row.room_title,
+        originCity: row.origin_city,
+        passport: row.passport
+      }))
+    }
+  });
+}
+
+async function getAssignmentQuery1(req, res) {
+  const { floor, roomId } = req.query;
+  if (!floor || !roomId) {
+    throw new ApiError(400, 'floor and roomId are required');
+  }
+  const result = await query(
+    'SELECT price, capacity, floor, title FROM rooms WHERE id = $1 AND floor = $2',
+    [roomId, floor]
+  );
+  if (result.rows.length === 0) {
+    return res.json({ data: { found: false } });
+  }
+  const { price, capacity, title } = result.rows[0];
+  const placeCost = Number(price) / Number(capacity);
+  res.json({
+    data: {
+      found: true,
+      title,
+      price: Number(price),
+      capacity,
+      placeCost
+    }
+  });
+}
+
+async function getAssignmentQuery2(req, res) {
+  const { city } = req.query;
+  if (!city) {
+    throw new ApiError(400, 'city query param is required');
+  }
+  const result = await query(
+    `SELECT b.id, b.guest_name, b.passport, b.origin_city, b.check_in, b.check_out, b.bed_number, r.title AS room_title
+     FROM bookings b
+     JOIN rooms r ON r.id = b.room_id
+     WHERE LOWER(b.origin_city) = LOWER($1) AND b.status = 'confirmed'
+     ORDER BY b.check_in DESC`,
+    [city.trim()]
+  );
+  res.json({
+    data: result.rows.map(row => ({
+      id: row.id,
+      guestName: row.guest_name,
+      passport: row.passport,
+      originCity: row.origin_city,
+      checkIn: row.check_in,
+      checkOut: row.check_out,
+      bedNumber: row.bed_number,
+      roomTitle: row.room_title
+    }))
+  });
+}
+
+async function getAssignmentQuery3(req, res) {
+  const { clientName, dayOfWeek } = req.query;
+  if (!clientName || !dayOfWeek) {
+    throw new ApiError(400, 'clientName and dayOfWeek are required');
+  }
+
+  // 1. Find rooms & floors for this client name
+  const roomsQuery = await query(
+    `SELECT DISTINCT r.floor, r.title
+     FROM bookings b
+     JOIN rooms r ON r.id = b.room_id
+     WHERE LOWER(b.guest_name) LIKE LOWER($1) AND b.status = 'confirmed'`,
+    [`%${clientName.trim()}%`]
+  );
+
+  if (roomsQuery.rows.length === 0) {
+    return res.json({
+      data: {
+        foundClient: false,
+        clientName,
+        employees: []
+      }
+    });
+  }
+
+  const floors = roomsQuery.rows.map(row => row.floor);
+
+  // 2. Query cleaners who clean these floors on specified dayOfWeek
+  const cleanersQuery = await query(
+    `SELECT id, full_name, floors, days_of_week
+     FROM employees
+     WHERE $1 = ANY(days_of_week) 
+       AND (
+         SELECT bool_or(x = ANY(floors)) 
+         FROM unnest($2::int[]) x
+       )`,
+    [dayOfWeek.trim(), floors]
+  );
+
+  res.json({
+    data: {
+      foundClient: true,
+      clientName,
+      floorsMatched: floors,
+      roomsMatched: roomsQuery.rows.map(r => r.title),
+      employees: cleanersQuery.rows.map(row => ({
+        id: row.id,
+        fullName: row.full_name,
+        floors: row.floors,
+        daysOfWeek: row.days_of_week
+      }))
+    }
+  });
+}
+
 module.exports = {
   getAllRooms,
   createRoom,
@@ -215,4 +441,11 @@ module.exports = {
   blockUser,
   unblockUser,
   uploadRoomImage,
+  getAllEmployees,
+  hireEmployee,
+  fireEmployee,
+  getAssignmentStats,
+  getAssignmentQuery1,
+  getAssignmentQuery2,
+  getAssignmentQuery3,
 };

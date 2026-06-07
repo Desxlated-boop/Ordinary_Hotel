@@ -31,11 +31,14 @@ export default function RoomDetailPage() {
         <div className="room-detail__info">
           <h1>{room.title}</h1>
           <p className="room-detail__price">{formatPrice(room.price)} ₽ / ночь</p>
+          <p className="room-detail__price-per-person" style={{ fontSize: '1.1rem', color: '#27ae60', fontWeight: 'bold', marginBottom: '1rem' }}>
+            Цена за одного человека: {formatPrice(Math.round(room.price / room.capacity))} ₽ / ночь
+          </p>
           <p className="room-detail__capacity">Вместимость: до {room.capacity} гостей</p>
           <p className="room-detail__description">{room.description}</p>
         </div>
         <aside className="room-detail__aside">
-          <BookingForm roomId={room.id} />
+          <BookingForm room={room} />
         </aside>
       </div>
     </section>

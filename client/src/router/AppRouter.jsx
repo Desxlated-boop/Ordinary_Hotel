@@ -9,6 +9,7 @@ import RegisterPage from '../pages/RegisterPage';
 import ProfilePage from '../pages/ProfilePage';
 import AdminRoomsPage from '../pages/admin/AdminRoomsPage';
 import AdminBookingsPage from '../pages/admin/AdminBookingsPage';
+import AdminReportsPage from '../pages/admin/AdminReportsPage';
 
 export default function AppRouter() {
   return (
@@ -40,6 +41,14 @@ export default function AppRouter() {
           element={
             <ProtectedRoute adminOnly>
               <AdminBookingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/reports"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminReportsPage />
             </ProtectedRoute>
           }
         />

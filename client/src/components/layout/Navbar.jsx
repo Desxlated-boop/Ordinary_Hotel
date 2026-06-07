@@ -22,6 +22,7 @@ export default function Navbar() {
                 <>
                   <NavLink to="/admin/rooms">Админ: номера</NavLink>
                   <NavLink to="/admin/bookings">Админ: брони</NavLink>
+                  <NavLink to="/admin/reports">Админ: отчеты</NavLink>
                 </>
               )}
               <button type="button" className="btn btn--ghost" onClick={logout}>

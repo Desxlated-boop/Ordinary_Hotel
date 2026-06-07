@@ -24,4 +24,13 @@ router.post(
   asyncHandler(adminController.uploadRoomImage)
 );
 
+// Staff and Assignment reports endpoints
+router.get('/employees', asyncHandler(adminController.getAllEmployees));
+router.post('/employees', asyncHandler(adminController.hireEmployee));
+router.delete('/employees/:id', asyncHandler(adminController.fireEmployee));
+router.get('/assignment/stats', asyncHandler(adminController.getAssignmentStats));
+router.get('/assignment/query1', asyncHandler(adminController.getAssignmentQuery1));
+router.get('/assignment/query2', asyncHandler(adminController.getAssignmentQuery2));
+router.get('/assignment/query3', asyncHandler(adminController.getAssignmentQuery3));
+
 module.exports = router;

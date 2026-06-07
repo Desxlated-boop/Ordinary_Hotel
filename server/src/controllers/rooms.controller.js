@@ -2,12 +2,17 @@ const { query } = require('../db/pool');
 const ApiError = require('../utils/ApiError');
 
 function mapRoom(row) {
+  const price = Number(row.price);
+  const capacity = Number(row.capacity);
   return {
     id: row.id,
     title: row.title,
     description: row.description,
-    price: Number(row.price),
-    capacity: row.capacity,
+    price,
+    capacity,
+    pricePerPerson: capacity > 0 ? (price / capacity) : price,
+    floor: row.floor,
+    roomType: row.room_type,
     imageUrl: row.image_url,
     isPopular: row.is_popular,
     createdAt: row.created_at,

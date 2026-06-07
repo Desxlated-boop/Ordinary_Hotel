@@ -11,6 +11,9 @@ export default function RoomCard({ room }) {
         <p className="room-card__meta">
           до {room.capacity} гостей · <strong>{formatPrice(room.price)} ₽</strong> / ночь
         </p>
+        <p style={{ fontSize: '0.85rem', color: '#27ae60', fontWeight: 'bold', margin: '-0.25rem 0 0.5rem 0' }}>
+          Один человек: {formatPrice(Math.round(room.price / room.capacity))} ₽ / ночь
+        </p>
         <p className="room-card__desc">{room.description.slice(0, 100)}…</p>
         <div className="room-card__actions">
           <Link to={`/rooms/${room.id}`} className="btn btn--primary">

@@ -99,7 +99,7 @@ export default function AdminBookingsPage() {
                     <td>{b.id}</td>
                     <td>{b.userEmail}</td>
                     <td>{b.roomTitle}</td>
-                    <td>{b.guestName}</td>
+                    <td>{b.guestName} ({b.guestCount || 1} {b.guestCount === 1 ? 'гость' : b.guestCount < 5 ? 'гостя' : 'гостей'})</td>
                     <td>{formatDate(b.checkIn)}</td>
                     <td>{formatDate(b.checkOut)}</td>
                     <td>{translateStatus(b.status)}</td>

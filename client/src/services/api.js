@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 function getToken() {
   return localStorage.getItem('token');
@@ -77,4 +77,13 @@ export const api = {
     form.append('image', file);
     return upload('/admin/uploads/room-image', form);
   },
+
+  // Assignment №1 REST client integrations
+  adminGetEmployees: () => request('/admin/employees'),
+  adminHireEmployee: (body) => request('/admin/employees', { method: 'POST', body: JSON.stringify(body) }),
+  adminFireEmployee: (id) => request(`/admin/employees/${id}`, { method: 'DELETE' }),
+  adminGetAssignmentStats: (date = '') => request(`/admin/assignment/stats${date ? `?date=${encodeURIComponent(date)}` : ''}`),
+  adminGetAssignmentQuery1: (floor, roomId) => request(`/admin/assignment/query1?floor=${floor}&roomId=${roomId}`),
+  adminGetAssignmentQuery2: (city) => request(`/admin/assignment/query2?city=${encodeURIComponent(city)}`),
+  adminGetAssignmentQuery3: (clientName, dayOfWeek) => request(`/admin/assignment/query3?clientName=${encodeURIComponent(clientName)}&dayOfWeek=${encodeURIComponent(dayOfWeek)}`),
 };
